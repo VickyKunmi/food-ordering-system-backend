@@ -41,11 +41,6 @@ const addCoupon = async (req, res) => {
   }
 };
 
-
-
-
-
-
 const getCoupons = async (req, res) => {
   try {
     const coupons = await CouponModel.find({});
@@ -94,15 +89,12 @@ const updateCoupon = async (req, res) => {
     if (req.body.endDate) coupon.endDate = req.body.endDate;
 
     await coupon.save();
-    res.json({success: true, message: "Coupon updated successfully"})
+    res.json({ success: true, message: "Coupon updated successfully" });
   } catch (error) {
     console.log(error);
-    res.json({success: false, message: "Unable to update coupon"})
+    res.json({ success: false, message: "Unable to update coupon" });
   }
 };
-
-
-
 
 // Fetch a coupon by its code
 const getCouponByCode = async (req, res) => {
@@ -115,13 +107,74 @@ const getCouponByCode = async (req, res) => {
     }
   } catch (error) {
     console.error("Error fetching coupon:", error);
-    res.status(500).json({ success: false, message: "An error occurred while fetching the coupon." });
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the coupon.",
+    });
+  }
+};
+
+// fetch total number of coupon
+
+const getTotalCoupon = async (req, res) => {
+  try {
+    const count = await CouponModel.countDocuments({});
+    res.json({ success: true, totalCouponList: count });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error retrieving total coupon" });
+  }
+};
+
+// Fetch available coupons (based on start and end dates)
+const getAvailableCoupons = async (req, res) => {
+  try {
+    const currentDate = new Date();
+
+    const availableCoupons = await CouponModel.countDocuments({
+      startDate: { $lte: currentDate },
+      endDate: { $gte: currentDate },
+    });
+
+    res.json({ success: true, totalAvailable: availableCoupons });
+  } catch (error) {
+    console.error("Error fetching available coupons:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching available coupons.",
+    });
+  }
+};
+
+const getClosedCoupons = async (req, res) => {
+  try {
+    const currentDate = new Date();
+
+    const closedCoupons = await CouponModel.countDocuments({
+      endDate: { $lt: currentDate },
+    });
+
+    res.json({ success: true, totalClosed: closedCoupons });
+  } catch (error) {
+    console.error("Error fetching closed coupons:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching closed coupons.",
+    });
   }
 };
 
 
 
+export {
+  addCoupon,
+  getCoupons,
+  deleteCoupon,
+  getCouponById,
+  updateCoupon,
+  getCouponByCode,
+  getTotalCoupon,
+  getAvailableCoupons,
+  getClosedCoupons,
 
-export { addCoupon, getCoupons, deleteCoupon, getCouponById, updateCoupon, getCouponByCode };
-
-
+};
